@@ -26,12 +26,9 @@ export default {
 };
 
 async function getKwikSources(anilistId, episode, mode) {
-  const slug = await getSlug(anilistId);
-  
-  // URL's correct geconstrueerd zonder inline async await
   const attempts = [
-    `https://api.consumet.org/anime/gogoanime/watch/${slug}-episode-${episode}`,
-    `https://api.consumet.org/anime/zoro/watch/${anilistId}-episode-${episode}`
+    `https://api.consumet.org/anime/gogoanime/\( {await getSlug(anilistId)}-episode- \){episode}`,
+    `https://api.consumet.org/anime/zoro/\( {anilistId}-episode- \){episode}`
   ];
 
   for (const apiUrl of attempts) {
@@ -50,9 +47,7 @@ async function getKwikSources(anilistId, episode, mode) {
       );
 
       if (kwikLink) return [kwikLink];
-    } catch (e) {
-        // Log eventueel de fout hier indien nodig voor debugging
-    }
+    } catch (e) {}
   }
   return [];
 }
@@ -69,8 +64,7 @@ async function getSlug(anilistId) {
     });
     const json = await res.json();
     const title = json?.data?.Media?.title?.romaji || `anime-${anilistId}`;
-    // Vervang spaties door koppeltekens en verwijder speciale karakters
-    return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, '');
+    return title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   } catch(e) {
     return `anime-${anilistId}`;
   }
